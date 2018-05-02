@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-### Purpose
+## Purpose
 
 This is the Spring 2018 Group Final Project for BUDA 535.  This final consists of 4 
 questions and is worth 100 points.  This final is expected to be done in teams.
@@ -43,6 +43,8 @@ library(readr)
 library(ISLR)
 library(rpart)
 library(rpart.plot)
+#install.packages("rattle")
+library(rattle)
 ```
 
 We were given a file that contains the results of a questionare that was given to 156 employees at a major company.  Two experts sat in a room asked each employee to define a process or a term, then gave a score of 1 to 5.  These processes were also categorized as questions that would be considered technical for a field versus common questions that everyone should know.
@@ -53,7 +55,7 @@ QDat<- read.csv("C:\\Users\\Jordon Wolfram\\Documents\\WVU\\BUDA 535 Data Mining
 names(QDat[,3:26])
 ```
 
-Our goal as data analysists was to gain an understanding of this employee data and provide insights into their level of "Knowledge".  In the steps below, we first summarize the question data into an overall score.  This provides insight into which employees ranked highest on the question scores.  Being that the questions were divided into Technical vs Common scores though, we want to define knowledge further into quadrants:
+Our goal as data analyists was to gain an understanding of this employee data and provide insights into their level of "Knowledge".  In the steps below, we first summarize the question data into an overall score.  This provides insight into which employees ranked highest on the question scores.  Being that the questions were divided into Technical vs Common scores though, we want to define knowledge further into quadrants:
 
 low_tech_low_over: Employees with low (negative) difference in their technical vs common score AND low overall score
 low_tech_high_over: Employees with low (negative) difference in their technical vs common score AND high overall score
@@ -91,23 +93,22 @@ QDat$classification[OverScore>0 & Diff<0]="high_tech_low_over"         #Employee
 #Add bank in the data demographics
 QDatClass<-cbind(QDat[,(3:26)],QDat$classification)
 names(QDatClass)[25]="classification"
-head(QDatClass)
 
 #Verify that four classifications were made
 unique(QDatClass$classification)
 ```
 
-Classifying an employees knowledge is an important step.  We wanted to take it further through and start digging into the demographic data that was provided for each employee and see what insights this contained into what classification quadrant they would fall into.  Before doing that, we want to look at a summary breakdown of the classifications to give us a starting point.
+Classifying an employee's knowledge is an important step.  We wanted to take it further though and start digging into the demographic data that was provided for each employee and see what insights this contained into what classification quadrant they would fall into.  Before doing that, we want to look at a summary breakdown of the classifications to give us a starting point.
 
 ```{r}
 table(QDatClass$classification)
-#Prediction Error that you would get by simply choosing the most common classification of low_tech_low_over.
-1 - (max(table(QDatClass$classification))/nrow(QDatClass))
+#PAccuracy that you would get by simply choosing the most common classification of low_tech_low_over.
+max(table(QDatClass$classification))/nrow(QDatClass)
 
 ```
-So if we were to not consider demographic information and simply classify all employees as low_tech_low_over, we would be wrong 60% of the time.  Important too, we would miss the benefit of identifying the other three classifications which can help with employee insight and placement.
+So if we were to not consider demographic information and simply classify all employees as low_tech_low_over, we would be right 40% of the time.  Important too, we would miss the benefit of identifying the other three classifications which can help with employee insight and placement.
 
-By looking at the demographic data surrounding each employee, we hope to improve this 60% error and to help classify what classification an employee falls into and what are the most important demographics that create this.
+By looking at the demographic data surrounding each employee, we hope to improve on this 40% and to help classify what classification an employee falls into and what are the most important demographics that create this.
 
 A lot of different models and methods were run on the data.  We found that while it is simplistic, the recursive partitioning method created an ideal model for predicting the classification of an employee.  The code is below:
 ```{r}
