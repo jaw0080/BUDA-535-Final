@@ -2,7 +2,9 @@
 title: "BUDA 535 Final"
 author: "Jordon Wolfram +Ivonne Wardell + Scott Branham"
 date: "April 28, 2018"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -213,6 +215,7 @@ names(ML)
 table(ML$class)
 set.seed(616)
 test<-sample(1:8770,2770)
+train <- (1:8770)[-test]
 ```
 
 OUr group started by getting an overview of the whole dataset to understand the range of each variable.
@@ -221,15 +224,18 @@ summary(ML)
 str(ML)
 dim(ML)
 ```
-After spending time reviewing and understanding the data, we worked through many models that were designed predict most accurately whether the acre price would be above or below the mean.  Through extensive testing, we decided to utilize the GLM model using the caret package tools to do thisbest.
+
+After spending time reviewing and understanding the data, we worked through many models that were designed to predict most accurately whether the acre price would be above or below the mean sale price.  Classification tree models and R-part models were developed to review the overall impact of the class variable. They did provide initial clarification that the mean sale prices were accurately depicted, additional understanding was needed to confirm this. Through extensive testing, we decided to utilize the GLM model using the caret package tools to make the best determination.
 
 #Using Caret to generate a GLM model.
 ```{r}
 fitControl <- trainControl(method = "cv",
                            number = 10)
+```
 
+```{r}
 #Create the model that will self-select the best alpha and lamba tuning parameters using the training data
-m1<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial")
+m1<-train(class~.,data=ML[train,],method="glmnet",trControl=fitControl,family="binomial")
 
 #Run the predictions on the test data
 preds<-predict(m1,newdata = ML[-train,])
@@ -242,7 +248,8 @@ With this honed in model, we were able to achieve an 85% prediction accuracy on 
 coef(m1$finalModel, m1$bestTune$lambda)
 ```
 
-###INSERT HERE AND TAK ABOUT COEFFICIENTS.
+The 85%  accuracy achieved using the model showed a near-equal number of false positives and false negatives when compared to the mean sale price. This exhibited a fairly even distribution of responses from the variables as part of the dataset. However, in looking at the coeffecicients in the final model, Percentage of Crops that were farmable and Productivity had the greatest impact on where the sale prices fell in relation to the mean. Region also showed of having significance in the overall sale price, but that variable could have as much to do with geography, socioeconomic status, and per capita income on that region in Minnesota as it does the land itself. From this model and in reviewing the confusion matrix output, the distribution of sales that were correlated to a larger percentage of crops that were farmable and land that was productive in its sheer ability to produce crops lent themselves to the those prices that were highest in the market during the period of analysis.
+
 
 
 
