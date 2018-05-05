@@ -13,13 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 This is the Spring 2018 Group Final Project for BUDA 535.  This final consists of 4 
 questions and is worth 100 points.  This final is expected to be done in teams.
 
-### Problem 1 (20 points)
-*In this course most of our focus has been on creating and evaluating models based on prediction. This question focuses on our experience with classification models.  We have learned many techniques such as LDA, QDA, multinomial logistic regression, tree based methods alng with many others.  Compare and contrast these methods.  You should also comment on when you expect these methods to work well and out preform others.  Describe the perceived benefits and disadvantages of each of these methods.  For example a few points you could discuss are do they make assumptions ?*
-*Can they be easily explained? For sake of completeness assume you are selecting model using a train test procedure with a validation data set*
-
-
-### Problem 2 (20 Points)
-*Compare and contrast K-means and hierarchical clustering. What are the possible different variations of hierarchical clustering (discuss at least 3), and how do they relate to K-means?  Are there drawbacks to these methods and if so what are they?  How do you select the number of clusters in each method? Explain the process to select clusters.*
+This document presents the third and fourth questions.
 
 
 ### Problem 3 (30 Points)
@@ -37,6 +31,7 @@ library(stringr)
 library(dplyr)
 library(ggplot2) 
 library(tidyr)
+#install.packages("readr")
 library(readr)
 library(ISLR)
 library(rpart)
@@ -204,6 +199,7 @@ This information could be applied during the hiring process of new employees to 
 
 
 
+
 ```{r}
 install.packages("alr4")
 library(alr4)
@@ -219,6 +215,8 @@ table(ML$class)
 set.seed(616)
 test<-sample(1:8770,2770)
 ```
+
+
 ```{r}
 summary(ML)
 str(ML)
@@ -319,7 +317,11 @@ glm_g<-expand.grid(lambda=seq(0.1,10,1),alpha=seq(0,1,.025))
 m2<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial", tuneGrid=glm_g)
 ```
 
+m1<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial")
+m1
+```
+
+
 ```{r}
 preds2<-predict(m2,newdata = test)
 confusionMatrix(data=preds2, reference =test$class)
-```
