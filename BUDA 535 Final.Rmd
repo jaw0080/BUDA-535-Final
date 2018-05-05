@@ -227,34 +227,22 @@ After spending time reviewing and understanding the data, we worked through many
 ```{r}
 fitControl <- trainControl(method = "cv",
                            number = 10)
-```
 
-Create the model
-```{r}
+#Create the model that will self-select the best alpha and lamba tuning parameters using the training data
 m1<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial")
-m1
-```
 
-```{r}
+#Run the predictions on the test data
 preds<-predict(m1,newdata = ML[-train,])
 confusionMatrix(data=preds, reference =ML[-train,]$class)
 ```
 
+With this honed in model, we were able to achieve an 85% prediction accuracy on the test data.  Now we can look at how each coefficient affected the model
 
 ```{r}
-glm_g<-expand.grid(lambda=seq(0.1,10,1),alpha=seq(0,1,.025))
+coef(m1$finalModel, m1$bestTune$lambda)
 ```
 
-```{r}
-m2<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial", tuneGrid=glm_g)
-```
-
-
-
-```{r}
-preds2<-predict(m2,newdata = ML[train,])
-confusionMatrix(data=preds2, reference = ML[train,]$class)
-```
+###INSERT HERE AND TAK ABOUT COEFFICIENTS.
 
 
 
