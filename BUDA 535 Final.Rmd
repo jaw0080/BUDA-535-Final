@@ -38,6 +38,7 @@ library(rpart)
 library(rpart.plot)
 #install.packages("rattle")
 library(rattle)
+library(e1071)
 ```
 
 We were given a file that contains the results of a questionare that was given to 156 employees at a major company.  Two experts sat in a room asked each employee to define a process or a term, then gave a score of 1 to 5.  These processes were also categorized as questions that would be considered technical for a field versus common questions that everyone should know.
@@ -198,10 +199,8 @@ This information could be applied during the hiring process of new employees to 
 *Build a predictive model using the `ML` data where your response is class.  Give any insights you can on the models you built, while only presenting the model you consider the best.  Treat the set `test` as a validation set for this model to compare final predictions on. Discuss any results that you may find interesting about what variables are drivers and how they effect the prediction.  Discuss any disadvantages your model may have over other you fit, while justifying why you chose it. Just as in problem 3 include your code for all models you build, but do not present the results unless they are relevant.  It is OK to explain your process in your text without printing the code, just make sure the code is in the .Rmd. HINT:  An interesting result may be to look at the misclassified points and comment on the value of these properties, does your model over or undervalue based on the predictions.* 
 
 
-
-
 ```{r}
-install.packages("alr4")
+#install.packages("alr4")
 library(alr4)
 data("MinnLand")
 ML<-na.omit(MinnLand)
@@ -216,94 +215,27 @@ set.seed(616)
 test<-sample(1:8770,2770)
 ```
 
-
+OUr group started by getting an overview of the whole dataset to understand the range of each variable.
 ```{r}
 summary(ML)
 str(ML)
 dim(ML)
 ```
+After spending time reviewing and understanding the data, we worked through many models that were designed predict most accurately whether the acre price would be above or below the mean.  Through extensive testing, we decided to utilize the GLM model using the caret package tools to do thisbest.
 
-#R-Part & Classification Trees
-```{r}
-library(rpart)
-r1 <- rpart(class ~region, ML, method = "anova")
-plot(r1, margin=.1)
-text(r1)
-```
-
-```{r}
-plot(r1, compress=TRUE, uniform=TRUE, branch=0.4, margin=.1)
-text(r1)
-```
-
-```{r}
-r2<-rpart(class~.,ML,method="anova")
-plot(r2,compress=TRUE,uniform=TRUE, branch=.4, margin=.1)
-text(r2)
-printcp(r2)
-```
-
-```{r}
-r3<-rpart(class~.,ML,method="anova",cp=.001)
-printcp(r3)
-plotcp(r3)
-```
-
-#GLM Net Model
-```{r}
-set.seed(616)
-test<-sample(1:8770,2770)
-train=(1:8770)[-test]
-Folds=rep(4,length(train))
-Folds[1:1500]=1
-Folds[1501:3000]=2
-Folds[3001:4500]=3
-install.packages("glmnet")
-library(glmnet)
-library(nnet)
-x1=lm(as.numeric(class)~.,data=ML[train,],x=TRUE)$x
-CVTry=cv.glmnet(x1,ML[train,9],lambda=seq(.01,1,.01), 
-nfolds=4,foldid=Folds,family="binomial")
-
-plot(CVTry)
-```
-
-#Caret Model
-```{r}
-library(caret)
-library(ISLR)
-library(glmnet)
-x=as.matrix(ML[,1:9])
-```
-
-```{r}
-v<-createFolds(test,k=5)
-length(v)
-names(v)
-```
-
-```{r}
-v1<-createFolds(test,k=5, returnTrain = TRUE)
-length(v1)
-names(v1)
-```
-
+#Using Caret to generate a GLM model.
 ```{r}
 fitControl <- trainControl(method = "cv",
                            number = 10)
 ```
 
+Create the model
 ```{r}
-library(ISLR)
-install.packages("e1071")
-library(e1071)
-library(caret)
 m1<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial")
 m1
 ```
 
 ```{r}
-library(caret)
 preds<-predict(m1,newdata = ML[-train,])
 confusionMatrix(data=preds, reference =ML[-train,]$class)
 ```
@@ -317,11 +249,12 @@ glm_g<-expand.grid(lambda=seq(0.1,10,1),alpha=seq(0,1,.025))
 m2<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial", tuneGrid=glm_g)
 ```
 
-m1<-train(class~.,data=ML,method="glmnet",trControl=fitControl,family="binomial")
-m1
-```
 
 
 ```{r}
-preds2<-predict(m2,newdata = test)
-confusionMatrix(data=preds2, reference =test$class)
+preds2<-predict(m2,newdata = ML[train,])
+confusionMatrix(data=preds2, reference = ML[train,]$class)
+```
+
+
+
